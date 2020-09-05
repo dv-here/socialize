@@ -10,7 +10,17 @@ let postSchema = new mongoose.Schema({
     comments:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Comment'
-    }]
+    }],
+    likeCount:{
+        type:Number,
+        default:0
+    },
+    likes:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'User'
+        }
+    ]
     // author:{
     //     type:mongoose.Schema.Types.ObjectId,
     //     ref:'User'

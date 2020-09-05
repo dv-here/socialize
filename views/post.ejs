@@ -7,7 +7,25 @@
         <p class="text-justify"><%= post.caption %> Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum accusantium nam dicta quia repellendus sunt fugiat voluptatum consequuntur, quae ea nihil? Nemo dicta dolores consequuntur quaerat minus commodi et odit. </p>
     </div>
 
-
+    <div class="comment-section">
+        <h1 id="comments">Comments</h1>
+        <div id="user-comment">
+            <% post.comments.forEach(comment=>{ %> 
+                <div class="container user-det px-2 rounded">
+                    <h4><%= comment.commentator %> </h4>
+                    <p class="comment-text lead text-justify"><%= comment.comment  %> </p>
+                </div>
+                <% }) %> 
+        </div>    
+        <div class="comment-form">
+        <form action="/post/<%= post._id %> " method="post">
+            <input class="form-control" type="text" name="name" placeholder="Name">
+            <br>
+            <textarea class="form-control" type="text" name="comment" placeholder="How do you feel about this post..."></textarea>
+            <button type="submit" class="btn btn-outline-primary mt-3">Comment</button>
+        </form>
+        </div>
+    </div>
 </div>
 
 <%- include('partials/footer') %> 

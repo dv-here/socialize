@@ -26,3 +26,18 @@ div.user-det:nth-child(2n+1){
 .comment-text{
     word-wrap: break-word;
 }
+#likes{
+    color:grey;
+    text-decoration: none;
+   
+}
+#likes:hover{
+    color:red;
+}
+#comments{
+    color:grey;
+    text-decoration: none;
+}
+#comments:hover{
+    color:steelblue 
+}
