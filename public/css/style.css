@@ -1,3 +1,6 @@
+*{
+    scroll-behavior: smooth;
+}
 .form{
     width: 40%;
     margin: auto;
@@ -5,5 +8,21 @@
 .thumbnail{
     width: 50%;
     margin:auto;
-    
+}
+.show-content{
+    width: 60%;
+    margin: auto;
+}
+.show-img{
+    width: 700px;
+}
+.comment-section{
+    width: 90%;
+    margin: auto;
+}
+div.user-det:nth-child(2n+1){
+    background: #f7f7f7;
+}
+.comment-text{
+    word-wrap: break-word;
 }
