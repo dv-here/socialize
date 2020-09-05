@@ -1,0 +1,17 @@
+<%- include('partials/header') %> 
+<div class="container thumbnail">
+    <h3 class="text-center">Posts</h3>
+    <div class="row">
+        <% posts.forEach(function(post){ %>
+            <div class="col-lg-9">
+                <div class="posts">
+                    <h3><%= post.creator %> </h3>
+                    <img src="<%= post.image %> " class="img-fluid img-thumbnail" alt="">
+                <p class="text-justify"> <%= post.caption %>  Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quas, culpa suscipit maxime reiciendis, officiis labore maiores velit aliquam ab, itaque quo veritatis deserunt iure laborum nam omnis. Quod, deserunt odio?</p>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+ 
+</div>
+<%- include('partials/footer') %> 
