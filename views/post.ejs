@@ -16,15 +16,19 @@
                     <p class="comment-text lead text-justify"><%= comment.comment  %> </p>
                 </div>
                 <% }) %> 
-        </div>    
-        <div class="comment-form">
-        <form action="/post/<%= post._id %> " method="post">
-            <input class="form-control" type="text" name="name" placeholder="Name">
-            <br>
-            <textarea class="form-control" type="text" name="comment" placeholder="How do you feel about this post..."></textarea>
-            <button type="submit" class="btn btn-outline-primary mt-3">Comment</button>
-        </form>
         </div>
+        <% if (currentUser) { %>
+            <div class="comment-form">
+            <form action="/post/<%= post._id %> " method="post">
+                <input class="form-control" type="text" name="name" placeholder="Name">
+                <br>
+                <textarea class="form-control" type="text" name="comment" maxlength="500" placeholder="How do you feel about this post..."></textarea>
+                <button type="submit" class="btn btn-outline-primary mt-3">Comment</button>
+            </form>
+            </div>
+        <% } else {%>
+            <a href="/login" class="btn btn-primary">Login to comment</a>
+        <% } %> 
     </div>
 </div>
 

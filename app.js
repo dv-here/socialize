@@ -4,7 +4,12 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const path = require('path');
+const passport = require('passport');
+const LocalStrategy = require('passport-local')
 const port = 4444;
+let posts = require('./models/post');
+let Comments = require('./models/comment');
+let User = require('./models/user');
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended:false}));
@@ -22,15 +27,29 @@ mongoose.connect("mongodb://localhost/socializeDB", {
   useUnifiedTopology: true,
 });
 
+// passport Configuration
+app.use(require('express-session')({
+    secret:"whatever it takes !!",
+    resave:false,
+    saveUninitialized:false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+app.use((req,res,next)=>{
+    res.locals.currentUser = req.user;
+    next();
+});
 // let posts = [
 //     {image:"https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1008&q=80",caption:"Caption1",creator:"user1"},
 //     {image:"https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1008&q=80",caption:"Caption2",creator:"user2"},
 //     {image:"https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1008&q=80",caption:"Caption3",creator:"user3"}, 
 // ]
 
-let posts = require('./models/post');
-let Comments = require('./models/comment');
 
+// routes
 app.get('/',(req,res)=>{
     res.send("hello there....");
 });
@@ -45,11 +64,11 @@ app.get('/posts',(req,res)=>{
     });
 })
 
-app.post("/posts",(req,res)=>{
+app.post("/posts",isUserLogged,(req,res)=>{
     // get data from form
     let image = req.body.image;
     let caption = req.body.caption;
-    let newpost = {image:image,caption:caption,creator:"user"};
+    let newpost = {image:image,caption:caption};
     // create a new post and save it to db
     posts.create(newpost,(err,post)=>{
         if(err) throw err;
@@ -65,7 +84,7 @@ app.get('/post/new',(req,res)=>{
     res.render("newPost");
 });
 
-//
+// comment route
 app.get('/post/:id',(req,res)=>{
     // find the post with the id
     let post_id = req.params.id
@@ -80,7 +99,7 @@ app.get('/post/:id',(req,res)=>{
     
 });
 
-app.post('/post/:id',(req,res)=>{
+app.post('/post/:id',isUserLogged,(req,res)=>{
     // search for id
     let id = req.params.id;
     posts.findById(id,(err,post)=>{
@@ -98,6 +117,49 @@ app.post('/post/:id',(req,res)=>{
         }
     });
 });
+
+// Authenticaion routes
+function isUserLogged(req,res,next){
+    if(req.isAuthenticated()){
+        return next();
+    }
+    res.redirect('/login'); 
+}
+
+// show the signup form
+app.get('/register',(req,res)=>{
+    res.render('signup');
+})
+
+// signup logic
+app.post('/register',(req,res)=>{
+    let newUser = new User({name:req.body.name ,email:req.body.email ,username:req.body.username});
+    User.register(newUser,req.body.password,(err,user)=>{
+        if(err){
+            console.log(err);
+            res.render("signup");
+        }
+        passport.authenticate('local')(req,res,()=>{
+            res.redirect('/posts');
+        })
+    })
+});
+
+// show the login form
+app.get('/login',(req,res)=>{
+    res.render('login');
+});
+
+// login logic
+app.post('/login', passport.authenticate("local",{successRedirect:'/posts',failureRedirect:'/login'}) ,(req,res)=>{
+});
+
+// logout logic
+app.get('/logout',(req,res)=>{
+    req.logOut();
+    res.render('login');
+})
+
 
 app.listen(port,()=>{
     console.log(`Server listening @ http://localhost:${port}`);

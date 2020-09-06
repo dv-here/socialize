@@ -3,13 +3,13 @@
     <h3 class="text-center mt-2">Posts</h3>
     <div class="row">
         <% posts.forEach(function(post){ %>
-            <div class="col-lg-9 col-md-9 justify-content-center mx-auto">
+            <div class="col-xs-9 mx-auto">
                 <div class="posts text-center bg-light p-3 my-3 rounded">
                     <h3><%= post.creator %> </h3>
                     <img src="<%= post.image %> " class="img-fluid rounded" alt="">
                     <div class="response">
                         <a href="#" style="text-decoration: none;" class="mr-4">
-                            <span id="likes">
+                            <span id="like-icon">
                                 <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-suit-heart-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
                                 </svg>
@@ -17,7 +17,7 @@
                             <span id="count">0</span>
                         </a>
                         <a href="#" style="text-decoration: none;">
-                            <span id="comments">
+                            <span id="comment-icon">
                                 <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-chat-square-dots-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.5a1 1 0 0 0-.8.4l-1.9 2.533a1 1 0 0 1-1.6 0L5.3 12.4a1 1 0 0 0-.8-.4H2a2 2 0 0 1-2-2V2zm5 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
                                   </svg>
