@@ -1,18 +1,17 @@
 <%- include('partials/header') %> 
-
-<div class="container mx-auto mt-5 show-content">
-    <div class="container mx-auto">
-        <h1>This post is by user</h1>
-        <img src="<%=post.image %> " class="img-fluid rounded d-block show-img" alt="">
-        <p class="text-justify"><%= post.caption %> Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum accusantium nam dicta quia repellendus sunt fugiat voluptatum consequuntur, quae ea nihil? Nemo dicta dolores consequuntur quaerat minus commodi et odit. </p>
-    </div>
-
-    <div class="comment-section">
+<div class="row w-100 mx-auto">
+<div class="col-12 col-md-9 mt-5 show-content">
+        <div class="mx-auto"><h1 class="text-center">This post is by <%= post.author.name %> </h1></div>
+        <img src="<%=post.image %> " class="img-fluid rounded d-block w-75 mx-auto" alt="">
+        <p class="text-justify w-75 mx-auto"><%= post.caption %> Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum accusantium nam dicta quia repellendus sunt fugiat voluptatum consequuntur, quae ea nihil? Nemo dicta dolores consequuntur quaerat minus commodi et odit. </p>
+</div>
+    <div class="col-12 col-md-9 mx-auto show-content">
+    <div class="comment-section w-75">
         <h1 id="comments">Comments</h1>
         <div id="user-comment">
             <% post.comments.forEach(comment=>{ %> 
                 <div class="container user-det px-2 rounded">
-                    <h4><%= comment.commentator %> </h4>
+                    <h4><a href="/profile/<%= comment.username %>"> <%= comment.commentator %> </a></h4>
                     <p class="comment-text lead text-justify"><%= comment.comment  %> </p>
                 </div>
                 <% }) %> 
@@ -20,8 +19,6 @@
         <% if (currentUser) { %>
             <div class="comment-form">
             <form action="/post/<%= post._id %> " method="post">
-                <input class="form-control" type="text" name="name" placeholder="Name">
-                <br>
                 <textarea class="form-control" type="text" name="comment" maxlength="500" placeholder="How do you feel about this post..."></textarea>
                 <button type="submit" class="btn btn-outline-primary mt-3">Comment</button>
             </form>
@@ -30,6 +27,7 @@
             <a href="/login" class="btn btn-primary">Login to comment</a>
         <% } %> 
     </div>
+</div>
 </div>
 
 <%- include('partials/footer') %> 

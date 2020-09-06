@@ -1,13 +1,12 @@
 <%- include('partials/header') %> 
 <div class="thumbnail">
     <h3 class="text-center mt-2">Posts</h3>
-    <div class="row">
         <% posts.forEach(function(post){ %>
-            <div class="col-xs-9 mx-auto">
-                <div class="posts text-center bg-light p-3 my-3 rounded">
+            <div class="col-12 col-sm-7 mx-auto">
+                <div class="posts text-center p-3 my-3 rounded">
                     <h3><%= post.creator %> </h3>
                     <img src="<%= post.image %> " class="img-fluid rounded" alt="">
-                    <div class="response">
+                    <div class="response my-3">
                         <a href="#" style="text-decoration: none;" class="mr-4">
                             <span id="like-icon">
                                 <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-suit-heart-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -16,13 +15,22 @@
                             </span>
                             <span id="count">0</span>
                         </a>
-                        <a href="#" style="text-decoration: none;">
+                        <a href="#" style="text-decoration: none;" class="mr-4">
                             <span id="comment-icon">
                                 <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-chat-square-dots-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.5a1 1 0 0 0-.8.4l-1.9 2.533a1 1 0 0 1-1.6 0L5.3 12.4a1 1 0 0 0-.8-.4H2a2 2 0 0 1-2-2V2zm5 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
                                   </svg>
                             </span>
-                            <span id="count">0</span>
+                            <span id="count"><%= post.comments.length %> </span>
+                        </a>
+                        <a href="/profile/<%= post.author.username %> " style="text-decoration: none;">
+                            <span id="profile-icon">
+                                <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-person-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                                  </svg>
+                                
+                            </span>
+                            <span id="count"><%= post.author.name %> </span>
                         </a>
                     </div>
                     <p class="text-justify"> <%= post.caption %>  Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quas, culpa suscipit maxime reiciendis, officiis labore maiores velit aliquam ab, itaque quo veritatis deserunt iure laborum nam omnis. Quod, deserunt odio?</p>
@@ -30,7 +38,7 @@
                 </div>
             </div>
         <% }); %>
-    </div>
+    
  
 </div>
 <%- include('partials/footer') %> 

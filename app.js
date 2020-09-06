@@ -10,6 +10,7 @@ const port = 4444;
 let posts = require('./models/post');
 let Comments = require('./models/comment');
 let User = require('./models/user');
+const post = require('./models/post');
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended:false}));
@@ -56,7 +57,7 @@ app.get('/',(req,res)=>{
 
 app.get('/posts',(req,res)=>{
     // get all posts from db
-    posts.find({},(err,allposts)=>{
+    posts.find({}).populate('author').exec((err,allposts)=>{
         if(err)throw err;
         else{
             res.render("home",{posts:allposts});
@@ -68,15 +69,19 @@ app.post("/posts",isUserLogged,(req,res)=>{
     // get data from form
     let image = req.body.image;
     let caption = req.body.caption;
-    let newpost = {image:image,caption:caption};
+    let author = req.user
+    let newpost = {image:image,caption:caption,author:author,date:Date.now()};
+
     // create a new post and save it to db
     posts.create(newpost,(err,post)=>{
         if(err) throw err;
         else{
+            author.posts.push(post);
+            author.save();
             // redirect to the posts page
             res.redirect('/posts');
         }
-    })
+    });
 });
 
 // route to create new post
@@ -84,12 +89,12 @@ app.get('/post/new',(req,res)=>{
     res.render("newPost");
 });
 
-// comment route
+// post show route
 app.get('/post/:id',(req,res)=>{
     // find the post with the id
     let post_id = req.params.id
     
-    posts.findById(post_id).populate('comments').exec((err,found_post)=>{
+    posts.findById(post_id).populate('comments').populate('author').exec((err,found_post)=>{
         if(err) throw err;
         else{
             // render that post page
@@ -99,13 +104,14 @@ app.get('/post/:id',(req,res)=>{
     
 });
 
+// create comment route
 app.post('/post/:id',isUserLogged,(req,res)=>{
     // search for id
     let id = req.params.id;
     posts.findById(id,(err,post)=>{
         if(err) throw err;
         else{
-            let comment = {commentator:req.body.name,comment:req.body.comment};
+            let comment = {commentator:req.user.name,username:req.user.username,comment:req.body.comment,date:Date.now()};
             Comments.create(comment,(err,comment)=>{
                 if(err) throw err;
                 else{
@@ -157,9 +163,21 @@ app.post('/login', passport.authenticate("local",{successRedirect:'/posts',failu
 // logout logic
 app.get('/logout',(req,res)=>{
     req.logOut();
-    res.render('login');
+    res.redirect('/login');
 })
 
+// profile route
+app.get('/profile/:username',(req,res)=>{
+    let username = req.params.username;
+    console.log(username);
+    User.find({username:username}).populate('posts').exec((err,found_user)=>{
+        if(err) throw err;
+        else{
+            console.log(found_user);
+            res.render('profile',{user:found_user});
+        }
+    });
+});
 
 app.listen(port,()=>{
     console.log(`Server listening @ http://localhost:${port}`);

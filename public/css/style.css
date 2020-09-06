@@ -1,12 +1,27 @@
 *{
+    margin: 0;
+    padding:0;
+    box-sizing: border-box;
     scroll-behavior: smooth;
 }
+html{
+    max-height: 100vh;
+    margin: 0;
+}
+.footer {
+    background-color: #f5f5f5;
+    position: absolute;
+    width: 100%;
+  }
+  
+  .footer > .container {
+    padding-top: 10px;
+  }
 .form{
     width: 40%;
     margin: auto;
 }
 .thumbnail{
-    width: 50%;
     margin:auto;
 }
 .show-content{
@@ -14,7 +29,7 @@
     margin: auto;
 }
 .show-img{
-    width: 700px;
+    width: 75%;
 }
 .comment-section{
     width: 90%;
@@ -27,17 +42,20 @@ div.user-det:nth-child(2n+1){
     word-wrap: break-word;
 }
 #like-icon{
-    color:grey;
-    text-decoration: none;
-   
-}
-#like-icon:hover{
     color:red;
+    text-decoration: none;
 }
 #comment-icon{
-    color:grey;
+    color:skyblue 
     text-decoration: none;
 }
-#comment-icon:hover{
-    color:skyblue 
+#profile-icon{
+    color:salmon
+}
+div.response{
+    display: flex;
+    justify-content: space-around;
+}
+.posts{
+    background: rgb(230, 216, 216);
 }

@@ -34,7 +34,7 @@
               </li>
               <% } else {%>            
                 <li class="nav-item">
-                  <a class="nav-link" href="/posts">@<%= currentUser.username %> </a>
+                  <a class="nav-link" href="/profile/<%= currentUser.username %>"><%= currentUser.name %> </a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="/logout">Logout</a>
