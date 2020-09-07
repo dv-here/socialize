@@ -1,6 +1,7 @@
 <%- include('partials/header') %> 
-    <div class="container mx-auto col-md-6 col-xs-4" style="margin-bottom: 270px;">
-        <h4 class="text-center mt-4">Login</h4>
+    <div class="container mx-auto col-md-6 col-xs-4" style="margin-bottom: 200px; margin-top: 100px;">
+        <h4 class="text-center mt-4 display-5">Login</h4>
+
         <form action="/login" method="POST">
             <div class="form-group">
                 <label for="exampleInputUsername">Username</label>
@@ -13,5 +14,6 @@
             
             <button type="submit" class="btn btn-primary">Submit</button>  <a href="/register" class="p-4"><span>   Don't have an account! Register</span></a>
         </form>
+       
     </div>
 <%- include('partials/footer') %> 

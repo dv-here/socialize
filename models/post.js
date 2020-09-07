@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 
 let postSchema = new mongoose.Schema({  
     image:{
@@ -25,7 +26,9 @@ let postSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
     },
-    date:Date
+    date:{
+        type:String
+    }
 });
 
 module.exports = mongoose.model("Post",postSchema);

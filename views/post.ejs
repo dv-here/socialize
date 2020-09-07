@@ -1,13 +1,56 @@
 <%- include('partials/header') %> 
 <div class="row w-100 mx-auto">
 <div class="col-12 col-md-9 mt-5 show-content">
-        <div class="mx-auto"><h1 class="text-center">This post is by <%= post.author.name %> </h1></div>
+        <div class="mx-auto"><h1 class="text-center display-4">This post is by <%= post.author.name %> </h1></div>
         <img src="<%=post.image %> " class="img-fluid rounded d-block w-75 mx-auto" alt="">
         <p class="text-justify w-75 mx-auto"><%= post.caption %> Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum accusantium nam dicta quia repellendus sunt fugiat voluptatum consequuntur, quae ea nihil? Nemo dicta dolores consequuntur quaerat minus commodi et odit. </p>
+        <div class="container response my-3">
+            <% if(has_liked){ %> 
+                <form action="/post/<%= post._id %>/dislike" method="post">
+                    <button type="submit"  class="btn pt-0 pb-0" style="text-decoration: none;" class="mr-4" data-toggle="tooltip" data-placement="top" title="Click to unlike">
+                        <span id="<%= post._id %>" style="color:red;" >
+                            <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-suit-heart-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
+                              </svg>
+                        </span>
+                        <span id="count"><%= post.likes.length %>  likes</span>
+                    </button>
+                </form>
+                <% }else{ %> 
+                    <form action="/post/<%= post._id %>/like" method="post">
+                    <button type="submit"  class="btn pt-0 pb-0" style="text-decoration: none;" class="mr-4" data-toggle="tooltip" data-placement="top" title="Click to like">
+                        <span id="<%= post._id %>">
+                            <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-suit-heart-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
+                              </svg>
+                        </span>
+                        <span id="count"><%= post.likes.length %>  likes</span>
+                    </button>
+                    </form>
+                <% } %> 
+            </form>
+            <a href="/post/<%=post._id %>#comments" style="text-decoration: none;" class="mr-4"  data-toggle="tooltip" data-placement="top" title="Click to reply">
+                <span id="comment-icon">
+                    <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-chat-square-dots-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.5a1 1 0 0 0-.8.4l-1.9 2.533a1 1 0 0 1-1.6 0L5.3 12.4a1 1 0 0 0-.8-.4H2a2 2 0 0 1-2-2V2zm5 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                      </svg>
+                </span>
+                <span id="count"><%= post.comments.length %> Replies </span>
+            </a>
+            <a href="/profile/<%= post.author.username %> " style="text-decoration: none;" data-toggle="tooltip" data-placement="top" title="View profile">
+                <span id="profile-icon">
+                    <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-person-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                      </svg>
+                    
+                </span>
+                <span id="count" ><%= post.author.name %> </span>
+            </a>
+        </div>
 </div>
     <div class="col-12 col-md-9 mx-auto show-content">
-    <div class="comment-section w-75">
-        <h1 id="comments">Comments</h1>
+    <div class="comment-section w-75 mx-auto">
+        <h1 id="comments" class="text-center">Comments</h1>
         <div id="user-comment">
             <% post.comments.forEach(comment=>{ %> 
                 <div class="container user-det px-2 rounded">
@@ -20,11 +63,13 @@
             <div class="comment-form">
             <form action="/post/<%= post._id %> " method="post">
                 <textarea class="form-control" type="text" name="comment" maxlength="500" placeholder="How do you feel about this post..." required></textarea>
-                <button type="submit" class="btn btn-outline-primary mt-3">Comment</button>
+                <div class="text-center"><button type="submit" class="btn btn-outline-primary mt-3">Comment</button></div>
             </form>
             </div>
         <% } else {%>
-            <a href="/login" class="btn btn-primary">Login to comment</a>
+            <div class="text-center">
+                <a href="/login" class="btn btn-primary">Login to comment</a>
+            </div>
         <% } %> 
     </div>
 </div>

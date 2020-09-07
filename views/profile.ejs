@@ -32,7 +32,7 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <% if (currentUser.username != user.username) { %>
+              <% if (currentUser != user) { %>
                 <h5 class="modal-title" id="exampleModalLabel"><%= user.name %>'s Followers </h5>
                 <% } else {%> 
                   <h5 class="modal-title" id="exampleModalLabel">Your Followers </h5>
@@ -55,11 +55,8 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <% if (currentUser.username != user.username) { %>
               <h5 class="modal-title" id="exampleModalLabel"><%= user.name %>'s Followings </h5>
-              <% } else {%> 
-                <h5 class="modal-title" id="exampleModalLabel">Your Followings </h5>
-              <% } %> 
+              
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -79,36 +76,72 @@
                 <% user.posts.forEach(function(post){ %>
                     <div class="my-3">
                         <div class="posts text-center p-3 rounded">
-                            <h3><%= post.creator %> </h3>
+                          <div class="container d-flex flex-column text-left">
+                            <div class="mb-2">
+                              <a href="/profile/<%= user.username %> " class="mb-2" style="text-decoration: none;"data-toggle="tooltip" data-placement="top" title="View profile">
+                                <span id="profile-icon">
+                                    <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-person-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                                      </svg>
+                                    
+                                </span>
+                                <span id="count"><%= user.name %> </span>
+                            </a>
+                            </div>
                             <img src="<%= post.image %> " class="img-fluid rounded" alt="">
+                        </div>
+                            <div><p class="text-justify"> <%= post.caption %>  Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quas, culpa suscipit maxime reiciendis, officiis labore maiores velit aliquam ab, itaque quo veritatis deserunt iure laborum nam omnis. Quod, deserunt odio?</p></div>
                             <div class="response my-3">
-                                <a href="#" style="text-decoration: none;" class="mr-4">
-                                    <span id="like-icon">
+                        
+                            <% let has_liked = false %> 
+                            <% for( let i = 0; i < post.likes.length; i++ ) { %> 
+                                <% if (post.likes[i]._id.equals(currentUser._id)) { %>
+                                    <% has_liked = true %> 
+                                    <% break %> 
+                                <% } %>
+                            <% } %>
+                            <% if(has_liked){ %> 
+                              <form action="/post/<%= post._id %>/dislike" method="post">
+                                <button type="submit" class="btn pt-0 pb-0" style="text-decoration: none;" class="mr-4" data-toggle="tooltip" data-placement="top" title="Click to unlike">
+                                    <span id="<%= post._id %>"style="color:red;">
                                         <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-suit-heart-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
-                                        </svg>
-                                    </span>
-                                    <span id="count">0</span>
-                                </a>
-                                <a href="/post/<%=post._id %>#comments" style="text-decoration: none;" class="mr-4">
-                                    <span id="comment-icon">
-                                        <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-chat-square-dots-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.5a1 1 0 0 0-.8.4l-1.9 2.533a1 1 0 0 1-1.6 0L5.3 12.4a1 1 0 0 0-.8-.4H2a2 2 0 0 1-2-2V2zm5 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
                                           </svg>
                                     </span>
-                                    <span id="count"><%= post.comments.length %> </span>
-                                </a>
-                                <a href="#" style="text-decoration: none;">
-                                    <span id="profile-icon">
-                                        <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-person-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd" d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                                    <span id="count"><%= post.likes.length %>  likes</span>
+                                </button>
+                              </form>
+                            <% }else{ %> 
+                              <form action="/post/<%= post._id %>/like" method="post">
+                                <button type="submit"  class="btn pt-0 pb-0" style="text-decoration: none;" class="mr-4" data-toggle="tooltip" data-placement="top" title="Click to like">
+                                    <span id="<%= post._id %>">
+                                        <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-suit-heart-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
                                           </svg>
-                                        
                                     </span>
-                                    <span id="count"><%= user.name %> </span>
-                                </a>
-                            </div>
-                            <p class="text-justify"> <%= post.caption %>  Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quas, culpa suscipit maxime reiciendis, officiis labore maiores velit aliquam ab, itaque quo veritatis deserunt iure laborum nam omnis. Quod, deserunt odio?</p>
+                                    <span id="count"><%= post.likes.length %>  likes</span>
+                                </button>
+                              </form>
+                            <% } %> 
+                        <a href="/post/<%=post._id %>#comments" style="text-decoration: none;" class="mr-4" data-toggle="tooltip" data-placement="top" title="Click to reply">
+                            <span id="comment-icon">
+                                <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-chat-square-dots-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.5a1 1 0 0 0-.8.4l-1.9 2.533a1 1 0 0 1-1.6 0L5.3 12.4a1 1 0 0 0-.8-.4H2a2 2 0 0 1-2-2V2zm5 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                                  </svg>
+                            </span>
+                            <span id="count"><%= post.comments.length %> Replies </span>
+                        </a>
+                        <a style="text-decoration: none;"data-toggle="tooltip" data-placement="top" title="Created on">
+                          <span id="date-icon">
+                              <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-calendar-check-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                  <path fill-rule="evenodd" d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4V.5zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2zm-5.146-5.146a.5.5 0 0 0-.708-.708L7.5 10.793 6.354 9.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0l3-3z"/>
+                                </svg>
+                              
+                          </span>
+                          <span id="count"><%= post.date %> </span>
+                      </a>
+                    </div>
+                            
                             <a href="/post/<%=post._id %>" class="btn btn-primary">See Post</a>
                         </div>
                     </div>

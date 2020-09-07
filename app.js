@@ -10,6 +10,7 @@ const port = 4444;
 let posts = require('./models/post');
 let Comments = require('./models/comment');
 let User = require('./models/user');
+let moment = require('moment');
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended:false}));
@@ -51,10 +52,10 @@ app.use((req,res,next)=>{
 
 // routes
 app.get('/',(req,res)=>{
-    res.send("hello there....");
+    res.redirect('/explore')
 });
 
-app.get('/home',(req,res)=>{
+app.get('/home',isUserLogged,(req,res)=>{
     // console.log(req.user.username);
     // get all posts of all the followers of the logged user from db
     User.findOne({username:req.user.username}).populate({
@@ -64,10 +65,16 @@ app.get('/home',(req,res)=>{
             path:'posts',
             model:'Post',
             options:{sort:{'date':-1}},
-            populate:{
-                path:'author',
-                model:'User'
-            }
+            populate:[
+                {
+                    path:'author',
+                    model:'User'
+                },
+                {
+                    path:"likes",
+                    model:'User'
+                }
+            ]
         }
         }).exec((err,user)=>{
         if(err) throw err;
@@ -82,7 +89,7 @@ app.post("/home",isUserLogged,(req,res)=>{
     let image = req.body.image;
     let caption = req.body.caption;
     let author = req.user
-    let newpost = {image:image,caption:caption,author:author,date:Date.now()};
+    let newpost = {image:image,caption:caption,author:author,date:moment().calendar()};
 
     // create a new post and save it to db
     posts.create(newpost,(err,post)=>{
@@ -92,6 +99,17 @@ app.post("/home",isUserLogged,(req,res)=>{
             author.save();
             // redirect to the posts page
             res.redirect('/home');
+        }
+    });
+});
+
+// explore route
+app.get('/explore',(req,res)=>{
+
+    posts.find({}).populate([{path:'author',model:'User'},{path:'likes',model:'User'}]).sort({date:-1}).exec((err,allposts)=>{
+        if(err) throw err;
+        else{
+            res.render('explore',{posts:allposts})
         }
     });
 });
@@ -106,30 +124,71 @@ app.get('/post/:id',(req,res)=>{
     // find the post with the id
     let post_id = req.params.id
     
-    posts.findById(post_id).populate('comments').populate('author').exec((err,found_post)=>{
+    posts.findById(post_id).populate([
+        {path:'comments',model:'Comment'},
+        {path:'author',model:'User'},
+        {path:'likes',model:'User'}
+    ]).exec((err,found_post)=>{
         if(err) throw err;
         else{
+            console.log("found:",found_post);
+            let has_liked = false;
+            for(let i=0;i<found_post.likes.length;i++){
+                if(req.user != null && found_post.likes[i]._id.equals(req.user._id)){
+                    has_liked = true;
+                    break;
+                }
+            }
             // render that post page
-            res.render('post',{post:found_post});
+            res.render('post',{post:found_post,has_liked:has_liked});
         }
     })
     
 });
 
-app.post('/home#:id',isUserLogged,(req,res)=>{
+// route to like a post
+app.post('/post/:id/like',isUserLogged,(req,res)=>{
 
     posts.findById(req.params.id,(err,post)=>{
-        console.log(post);
-        post.likes.push(req.user);
-        post.save(err=>{
-            if(err) throw err;
+        User.findOne({username:req.user.username},(err,user)=>{
+            if (err) throw err;
             else{
-                res.render('/home#'+post._id);
+                post.likes.push(req.user);
+                post.save(err=>{
+                    if(err) throw err;
+                    else{
+                        console.log(post);
+                        res.redirect('/post/'+req.params.id);
+                    }
+                })
             }
         })
+        
 
     });
 
+});
+// route to dislike a post
+app.post('/post/:id/dislike',isUserLogged,(req,res)=>{
+
+    posts.findById(req.params.id).populate({path:'likes',model:'User'}).exec((err,post)=>{
+            if (err) throw err;
+            else{
+                post.likes = post.likes.filter(function(liked_user){
+                    if(!liked_user._id.equals(req.user._id)){
+                        return liked_user;
+                    }
+                })
+                post.save(err=>{
+                    if(err) throw err;
+                    else{
+                        console.log("dislike",post);
+                        res.redirect('/post/'+req.params.id);
+                    }
+                })
+            }
+    });
+       
 });
 
 // create comment route
@@ -139,7 +198,7 @@ app.post('/post/:id',isUserLogged,(req,res)=>{
     posts.findById(id,(err,post)=>{
         if(err) throw err;
         else{
-            let comment = {commentator:req.user.name,username:req.user.username,comment:req.body.comment,date:Date.now()};
+            let comment = {commentator:req.user.name,username:req.user.username,comment:req.body.comment,date:moment().calendar()};
             Comments.create(comment,(err,comment)=>{
                 if(err) throw err;
                 else{
@@ -174,7 +233,7 @@ app.post('/register',(req,res)=>{
             res.render("signup");
         }
         passport.authenticate('local')(req,res,()=>{
-            res.redirect('/home');
+            res.redirect('/profile/'+newUser.username);
         })
     })
 });
@@ -185,7 +244,7 @@ app.get('/login',(req,res)=>{
 });
 
 // login logic
-app.post('/login', passport.authenticate("local",{successRedirect:'/home',failureRedirect:'/login'}) ,(req,res)=>{
+app.post('/login', passport.authenticate("local",{successRedirect:'/explore',failureRedirect:'/login'}) ,(req,res)=>{
 });
 
 // logout logic
@@ -195,7 +254,7 @@ app.get('/logout',(req,res)=>{
 })
 
 // profile route
-app.get('/profile/:username',(req,res)=>{
+app.get('/profile/:username',isUserLogged,(req,res)=>{
     let username = req.params.username;
     User.findOne({username:username}).populate(
         [
