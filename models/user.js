@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const passportLocalMongoose = require('passport-local-mongoose');
-
+const Schema = mongoose.Schema
 let userSchema = new mongoose.Schema({
 
     name:{
@@ -20,6 +20,23 @@ let userSchema = new mongoose.Schema({
         {
             type:mongoose.Schema.Types.ObjectId,
             ref:'Post'
+        }
+    ],
+    following:[
+        {
+            
+                type:mongoose.Schema.Types.ObjectId,
+                ref:'User',
+            
+        }
+    ],
+    followers:[
+        {
+            
+                type:mongoose.Schema.Types.ObjectId,
+                ref:'User',
+                
+            
         }
     ]
 });

@@ -5,24 +5,78 @@
           <div class="sticky-top">
             <img class="profile-pic img-thumbnail" src="https://images.unsplash.com/photo-1511367461989-f85a21fda167?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1189&q=80" alt="">
             <div class="name-head">
-              <h1 class="display-3">@<%= user[0].username %> </h1>
-              <h1 class="display-5"><%= user[0].name %> </h1> 
-              <% if (currentUser.username != user[0].username) { %>
-                <a href="#" class="btn btn-primary d-block my-auto">Follow</a>
+              <h1 class="display-3">@<%= user.username %> </h1>
+              <h1 class="display-5"><%= user.name %> </h1> 
+              <% if (currentUser.username != user.username) { %>
+                <% if (!has_followed) { %>
+                  <form action="/profile/<%= user.username %>/follow" method="post">
+                    <button type="submit" class="btn btn-primary" id="<%= user.username %> " data-toggle="tooltip" data-placement="top" title="Click to follow">Follow</button>
+                  </form>
+                <% }else{ %>
+                  <form action="/profile/<%=user.username%>/unfollow" method="post">
+                    <button class="btn btn-success" data-toggle="tooltip" data-placement="top" title="Click to unfollow">Following</button>
+                  </form>
+                <% } %> 
                 <% }else{ %> 
                 <a href="/post/new" class="btn btn-primary d-block my-auto">Create new post</a>
                 <% } %> 
           </div>
           <div class="d-flex justify-content-between text-center pt-3">
-            <span id="postcount"><h4><%= user[0].posts.length %> </h4> <h4>Posts</h4></span> 
-            <span id="followerscount"><h4>0</h4> <h4>Followers</h4></span> 
-            <span id="followingcount"><h4>0</h4><h4>Following</h4></span> 
+            <span id="postcount"><h4><%= user.posts.length %> </h4> <h4>Posts</h4></span> 
+            <a type="button" data-toggle="modal" data-target="#followers"><span id="followerscount"><h4><%= user.followers.length %> </h4> <h4>Followers</h4></span> </a>
+            <a type="button" data-toggle="modal" data-target="#followings"> <span id="followingcount"><h4><%= user.following.length %> </h4><h4>Following</h4></span>  </a>
         </div>
+        </div>
+      </div>
+      <div class="modal fade" id="followers" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <% if (currentUser.username != user.username) { %>
+                <h5 class="modal-title" id="exampleModalLabel"><%= user.name %>'s Followers </h5>
+                <% } else {%> 
+                  <h5 class="modal-title" id="exampleModalLabel">Your Followers </h5>
+                <% } %> 
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body"> 
+              <% followers.forEach(function(follower){ %>
+                <div class="container d-flex follower_name">
+                  <a href="/profile/<%= follower.username %>"><h4><%= follower.name %> </h4></a>
+                </div>
+              <% }); %> 
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="followings" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <% if (currentUser.username != user.username) { %>
+              <h5 class="modal-title" id="exampleModalLabel"><%= user.name %>'s Followings </h5>
+              <% } else {%> 
+                <h5 class="modal-title" id="exampleModalLabel">Your Followings </h5>
+              <% } %> 
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body"> 
+              <% followings.forEach(function(following){ %>
+                <div class="container d-flex following_name">
+                  <a href="/profile/<%= following.username %>"> <h4><%= following.name %> </h4></a>
+                </div>
+              <% }); %> 
+            </div>
+          </div>
         </div>
       </div>
       <div class="col-sm-7 bg-light">
         <div class="user-posts">
-                <% user[0].posts.forEach(function(post){ %>
+                <% user.posts.forEach(function(post){ %>
                     <div class="my-3">
                         <div class="posts text-center p-3 rounded">
                             <h3><%= post.creator %> </h3>
@@ -36,7 +90,7 @@
                                     </span>
                                     <span id="count">0</span>
                                 </a>
-                                <a href="#" style="text-decoration: none;" class="mr-4">
+                                <a href="/post/<%=post._id %>#comments" style="text-decoration: none;" class="mr-4">
                                     <span id="comment-icon">
                                         <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-chat-square-dots-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                             <path fill-rule="evenodd" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.5a1 1 0 0 0-.8.4l-1.9 2.533a1 1 0 0 1-1.6 0L5.3 12.4a1 1 0 0 0-.8-.4H2a2 2 0 0 1-2-2V2zm5 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
@@ -51,7 +105,7 @@
                                           </svg>
                                         
                                     </span>
-                                    <span id="count"><%= user[0].name %> </span>
+                                    <span id="count"><%= user.name %> </span>
                                 </a>
                             </div>
                             <p class="text-justify"> <%= post.caption %>  Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quas, culpa suscipit maxime reiciendis, officiis labore maiores velit aliquam ab, itaque quo veritatis deserunt iure laborum nam omnis. Quod, deserunt odio?</p>

@@ -10,7 +10,6 @@ const port = 4444;
 let posts = require('./models/post');
 let Comments = require('./models/comment');
 let User = require('./models/user');
-const post = require('./models/post');
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended:false}));
@@ -40,7 +39,7 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 app.use((req,res,next)=>{
-    res.locals.currentUser = req.user;
+    res.locals.currentUser = req.user || null;
     next();
 });
 // let posts = [
@@ -55,17 +54,30 @@ app.get('/',(req,res)=>{
     res.send("hello there....");
 });
 
-app.get('/posts',(req,res)=>{
-    // get all posts from db
-    posts.find({}).populate('author').exec((err,allposts)=>{
-        if(err)throw err;
+app.get('/home',(req,res)=>{
+    // console.log(req.user.username);
+    // get all posts of all the followers of the logged user from db
+    User.findOne({username:req.user.username}).populate({
+        path:'following',
+        model:'User',
+        populate:{
+            path:'posts',
+            model:'Post',
+            options:{sort:{'date':-1}},
+            populate:{
+                path:'author',
+                model:'User'
+            }
+        }
+        }).exec((err,user)=>{
+        if(err) throw err;
         else{
-            res.render("home",{posts:allposts});
+            res.render("home",{followings:user.following});
         }
     });
 })
 
-app.post("/posts",isUserLogged,(req,res)=>{
+app.post("/home",isUserLogged,(req,res)=>{
     // get data from form
     let image = req.body.image;
     let caption = req.body.caption;
@@ -79,13 +91,13 @@ app.post("/posts",isUserLogged,(req,res)=>{
             author.posts.push(post);
             author.save();
             // redirect to the posts page
-            res.redirect('/posts');
+            res.redirect('/home');
         }
     });
 });
 
 // route to create new post
-app.get('/post/new',(req,res)=>{
+app.get('/post/new',isUserLogged,(req,res)=>{
     res.render("newPost");
 });
 
@@ -102,6 +114,22 @@ app.get('/post/:id',(req,res)=>{
         }
     })
     
+});
+
+app.post('/home#:id',isUserLogged,(req,res)=>{
+
+    posts.findById(req.params.id,(err,post)=>{
+        console.log(post);
+        post.likes.push(req.user);
+        post.save(err=>{
+            if(err) throw err;
+            else{
+                res.render('/home#'+post._id);
+            }
+        })
+
+    });
+
 });
 
 // create comment route
@@ -146,7 +174,7 @@ app.post('/register',(req,res)=>{
             res.render("signup");
         }
         passport.authenticate('local')(req,res,()=>{
-            res.redirect('/posts');
+            res.redirect('/home');
         })
     })
 });
@@ -157,7 +185,7 @@ app.get('/login',(req,res)=>{
 });
 
 // login logic
-app.post('/login', passport.authenticate("local",{successRedirect:'/posts',failureRedirect:'/login'}) ,(req,res)=>{
+app.post('/login', passport.authenticate("local",{successRedirect:'/home',failureRedirect:'/login'}) ,(req,res)=>{
 });
 
 // logout logic
@@ -169,15 +197,116 @@ app.get('/logout',(req,res)=>{
 // profile route
 app.get('/profile/:username',(req,res)=>{
     let username = req.params.username;
-    console.log(username);
-    User.find({username:username}).populate('posts').exec((err,found_user)=>{
+    User.findOne({username:username}).populate(
+        [
+            {path:'posts',
+            model:'Post'},
+            {path:'followers',
+            model:'User'},
+            {path:'following',
+            model:'User'},
+            
+        ]
+        ).exec((err,found_user)=>{
         if(err) throw err;
         else{
-            console.log(found_user);
-            res.render('profile',{user:found_user});
+            
+            User.findOne({username:req.user.username},(err,user)=>{
+                if(err) throw err;
+                else{
+                    
+                    let followings = user.following;
+                    let has_followed = false;
+                    for(let i=0;i<followings.length;i++){
+                        if(found_user._id.equals(followings[i])){
+                            has_followed = true;
+                            break;
+                        }
+                    }
+                    // console.log("has_followed:",has_followed);
+                    
+                    res.render('profile',{user:found_user,has_followed:has_followed,followers:found_user.followers,followings:found_user.following});
+                }
+            });
+
         }
     });
 });
+
+// route to follow a user
+app.post('/profile/:username/follow',(req,res)=>{
+   
+    // find user by username(user to be followed)
+    User.findOne({username:req.params.username},(err,user_to_be_followed)=>{
+        if(err) throw err;
+        else{
+            user_to_be_followed.followers.push(req.user._id);
+            user_to_be_followed.save((err)=>{
+                if(err) throw err;
+                else{
+                
+                User.findOne(req.user,(err,user)=>{
+                    if(err) throw err;
+                    else{
+                        user.following.push(user_to_be_followed._id);
+                        user.save();
+                        // console.log("user_to_",user_to_be_followed); 
+                        res.redirect('/profile/'+req.params.username);
+                    }
+                });
+                }
+            });
+        }
+
+    });
+    
+});
+
+// route to unfollow a user
+app.post('/profile/:username/unfollow',(req,res)=>{
+
+    // find the user to be unfollowed
+    User.findOne({username:req.params.username},(err,user_to_be_Unfollowed)=>{
+        if(err) throw err;
+        else{
+            // unfollow that user
+            for(let i=0;i<user_to_be_Unfollowed.followers.length;i++){
+                if(req.user._id.equals(user_to_be_Unfollowed.followers[i]._id)){
+                    user_to_be_Unfollowed.followers.splice(i,1);
+                }
+            }
+            
+            console.log(user_to_be_Unfollowed);
+            // save it to the db
+            user_to_be_Unfollowed.save(err=>{
+                if(err) throw err;
+                else{
+                    User.findOne({username:req.user.username},(err,user)=>{
+                        if(err) throw err;
+                        else{
+                            for (let i = 0; i < user.following.length; i++) {
+                                if(user_to_be_Unfollowed._id.equals(user.following[i])){
+                                    user.following.splice(i,1);
+                                }
+                                
+                            }
+                            user.save(err=>{
+                                if(err) throw err;
+                                else{
+                                }
+                                res.redirect('/profile/'+req.params.username);
+                            });
+                        }
+                    });
+                }
+            });
+            
+            // res.redirect('/profile/'+req.params.username);
+        }
+    });
+
+});
+
 
 app.listen(port,()=>{
     console.log(`Server listening @ http://localhost:${port}`);

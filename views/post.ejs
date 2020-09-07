@@ -19,7 +19,7 @@
         <% if (currentUser) { %>
             <div class="comment-form">
             <form action="/post/<%= post._id %> " method="post">
-                <textarea class="form-control" type="text" name="comment" maxlength="500" placeholder="How do you feel about this post..."></textarea>
+                <textarea class="form-control" type="text" name="comment" maxlength="500" placeholder="How do you feel about this post..." required></textarea>
                 <button type="submit" class="btn btn-outline-primary mt-3">Comment</button>
             </form>
             </div>
