@@ -5,4 +5,5 @@ window.onload = function () {
     $('#myModal').on('shown.bs.modal', function () {
         $('#myInput').trigger('focus')
     });
+    $('#message').fadeTo(1000,1).fadeOut(3000);
 }

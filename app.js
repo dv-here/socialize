@@ -11,12 +11,14 @@ let posts = require('./models/post');
 let Comments = require('./models/comment');
 let User = require('./models/user');
 let moment = require('moment');
+let flash = require('connect-flash');
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(flash());
 
 //view engine setup
 app.set('views',path.join(__dirname,"views"));
@@ -41,6 +43,8 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 app.use((req,res,next)=>{
     res.locals.currentUser = req.user || null;
+    res.locals.error = req.flash("error");
+    res.locals.success = req.flash("success");
     next();
 });
 // let posts = [
@@ -90,7 +94,6 @@ app.post("/home",isUserLogged,(req,res)=>{
     let caption = req.body.caption;
     let author = req.user
     let newpost = {image:image,caption:caption,author:author,date:moment().calendar()};
-
     // create a new post and save it to db
     posts.create(newpost,(err,post)=>{
         if(err) throw err;
@@ -98,6 +101,7 @@ app.post("/home",isUserLogged,(req,res)=>{
             author.posts.push(post);
             author.save();
             // redirect to the posts page
+            req.flash("success","Post created successfully!!");
             res.redirect('/home');
         }
     });
@@ -158,6 +162,7 @@ app.post('/post/:id/like',isUserLogged,(req,res)=>{
                     if(err) throw err;
                     else{
                         console.log(post);
+                        req.flash("success","You liked this post!!");
                         res.redirect('/post/'+req.params.id);
                     }
                 })
@@ -183,6 +188,7 @@ app.post('/post/:id/dislike',isUserLogged,(req,res)=>{
                     if(err) throw err;
                     else{
                         console.log("dislike",post);
+                        req.flash("success","You disliked this post!!");
                         res.redirect('/post/'+req.params.id);
                     }
                 })
@@ -204,6 +210,7 @@ app.post('/post/:id',isUserLogged,(req,res)=>{
                 else{
                     post.comments.push(comment);
                     post.save();
+                    req.flash("success","You just added a comment !!");
                     res.redirect('/post/'+id+'#comments');
                 }
             });
@@ -216,6 +223,7 @@ function isUserLogged(req,res,next){
     if(req.isAuthenticated()){
         return next();
     }
+    req.flash("error","You need to be logged in to do that.");
     res.redirect('/login'); 
 }
 
@@ -229,10 +237,11 @@ app.post('/register',(req,res)=>{
     let newUser = new User({name:req.body.name ,email:req.body.email ,username:req.body.username});
     User.register(newUser,req.body.password,(err,user)=>{
         if(err){
-            console.log(err);
+            req.flash("error",err.message);
             res.render("signup");
         }
         passport.authenticate('local')(req,res,()=>{
+            req.flash("success","Welcome to Socialize "+ user.name +" !!");
             res.redirect('/profile/'+newUser.username);
         })
     })
@@ -244,12 +253,14 @@ app.get('/login',(req,res)=>{
 });
 
 // login logic
-app.post('/login', passport.authenticate("local",{successRedirect:'/explore',failureRedirect:'/login'}) ,(req,res)=>{
+app.post('/login', passport.authenticate("local",{successRedirect:'/explore',failureRedirect:'/login',failureFlash:true}) ,(req,res)=>{
+    req.flash("success","Welcome back "+ req.user.name);
 });
 
 // logout logic
 app.get('/logout',(req,res)=>{
     req.logOut();
+    req.flash("success","You've successfully logged out of Socialize !! Come back soon.     ");
     res.redirect('/login');
 })
 
@@ -310,6 +321,7 @@ app.post('/profile/:username/follow',(req,res)=>{
                         user.following.push(user_to_be_followed._id);
                         user.save();
                         // console.log("user_to_",user_to_be_followed); 
+                        req.flash("success","You followed "+ user_to_be_followed.name +"!!");
                         res.redirect('/profile/'+req.params.username);
                     }
                 });
@@ -330,7 +342,7 @@ app.post('/profile/:username/unfollow',(req,res)=>{
         else{
             // unfollow that user
             for(let i=0;i<user_to_be_Unfollowed.followers.length;i++){
-                if(req.user._id.equals(user_to_be_Unfollowed.followers[i]._id)){
+                if(req.user.equals(user_to_be_Unfollowed.followers[i])){
                     user_to_be_Unfollowed.followers.splice(i,1);
                 }
             }
@@ -352,8 +364,11 @@ app.post('/profile/:username/unfollow',(req,res)=>{
                             user.save(err=>{
                                 if(err) throw err;
                                 else{
+                                    req.flash("success","You unfollowed "+ user_to_be_Unfollowed.name +"!!");
+                                    res.redirect('/profile/'+req.params.username);
                                 }
-                                res.redirect('/profile/'+req.params.username);
+
+
                             });
                         }
                     });
