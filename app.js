@@ -135,7 +135,7 @@ app.get('/post/:id',(req,res)=>{
     ]).exec((err,found_post)=>{
         if(err) throw err;
         else{
-            console.log("found:",found_post);
+            // console.log("found:",found_post);
             let has_liked = false;
             for(let i=0;i<found_post.likes.length;i++){
                 if(req.user != null && found_post.likes[i]._id.equals(req.user._id)){
@@ -161,7 +161,7 @@ app.post('/post/:id/like',isUserLogged,(req,res)=>{
                 post.save(err=>{
                     if(err) throw err;
                     else{
-                        console.log(post);
+                        // console.log(post);
                         req.flash("success","You liked this post!!");
                         res.redirect('/post/'+req.params.id);
                     }
@@ -187,7 +187,7 @@ app.post('/post/:id/dislike',isUserLogged,(req,res)=>{
                 post.save(err=>{
                     if(err) throw err;
                     else{
-                        console.log("dislike",post);
+                        // console.log("dislike",post);
                         req.flash("success","You disliked this post!!");
                         res.redirect('/post/'+req.params.id);
                     }
@@ -347,7 +347,7 @@ app.post('/profile/:username/unfollow',(req,res)=>{
                 }
             }
             
-            console.log(user_to_be_Unfollowed);
+            // console.log(user_to_be_Unfollowed);
             // save it to the db
             user_to_be_Unfollowed.save(err=>{
                 if(err) throw err;
